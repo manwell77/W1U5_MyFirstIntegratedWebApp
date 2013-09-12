@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>openSAP My First Mobile Web App</title>
+
+<script id="sap-ui-bootstrap" type="text/javascript"
+	src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js"
+	data-sap-ui-theme="sap_mvi" data-sap-ui-libs="sap.m">
+</script>
+
+<script src="./js/datajs-1.1.1.js"></script>
+<script src="./view/SupplierDetail.view.js"></script>
+<script src="./controller/SupplierDetail.controller.js"></script>
+<script src="./view/ProductDetail.view.js"></script>
+<script src="./controller/ProductDetail.controller.js"></script>
+<script src="./view/ProductList.view.js"></script>
+<script src="./controller/ProductList.controller.js"></script>
+<script src="./view/App.view.js"></script>
+<script src="./controller/App.controller.js"></script>
+<script src="./js/sapui5_netweaver_logon.js"></script>
+
+<!-- SPLASH SCREEN CSS  
+<style>
+div.ctr{ position: absolute;
+         top: 50%;
+         left: 50%;
+         margin-top: -50px; 
+         margin-left: -50px;          
+         width: 100px;
+         height: 100px; }        
+</style>
+-->
+
+</head>
+
+<body class="sapUiBody">
+	
+	<!-- SPLASH SCREEN DIV -->
+	<!-- <div id="root" class="ctr"></div> -->
+	<div id="root"></div>
+
+	<script>   
+
+	// This is our entry point into the application
+	// TODO: Is there something we can show the user here while we wait
+	// TASK: Try find a way to display a splash screen while data is being loaded	
+	var busyDialog = (sap.ui.getCore().byId("busy")) ? sap.ui.getCore().byId("busy") : new sap.m.BusyDialog('busy',{title: 'Loading'});
+	busyDialog.open();	
+	// SPLASH SCREEN OPEN - SEE CSS ABOVE FOR IMAGE CENTER)
+	// var oImage = new sap.m.Image("Splash");
+	// oImage.setSrc("resources/loading.gif");
+	// oImage.setDecorative(false);
+	// oImage.placeAt("root");
+	
+	var odata;
+	
+	odata = 2;
+	
+	if (odata == 1)
+		{
+		var oDataModel = new sap.ui.model.odata.ODataModel("https://sapes1.sapdevcenter.com/sap/opu/odata/sap/ZGWSAMPLE_SRV/",true,"P424071","1sjus7m3"); 				
+		
+		oDataModel.read("/ProductCollection", null, null, true, 
+				
+				function(oData, oResponse){ oDataModel.oHeaders["x-csrf-token"] = oResponse.headers['x-csrf-token']; 
+											var myData = {};
+											myData.Products = oData.results;
+											var oModel = new sap.ui.model.json.JSONModel();
+											oModel.setData(myData);
+											sap.ui.getCore().setModel(oModel);											
+				                            busyDialog.close();	
+				                            var myapp = sap.ui.jsview("com.opensap.App");
+				                            myapp.placeAt('root'); },
+				
+				function(){ busyDialog.close();		
+				            var myapp = sap.ui.jsview("com.opensap.App");
+				            myapp.placeAt('root'); });				  
+		}
+	else
+	{
+		OData.read({ requestUri: "https://sapes1.sapdevcenter.com/sap/opu/odata/sap/ZGWSAMPLE_SRV/ProductCollection?$format=json", user: "P424071", password: "1sjus7m3" } 
+				  , 
+				  function (data) { 
+					  var oModel = new sap.ui.model.json.JSONModel();
+					  var myData = {};
+					  myData.Products = data.results;
+					  oModel.setData(myData);
+					  sap.ui.getCore().setModel(oModel);				  
+					  var myapp = sap.ui.jsview("com.opensap.App");	
+					  busyDialog.close();
+					  // SPLASH SCREEN CLOSE
+					  // $("#root").attr("class", "");
+					  // $("#root").innerHTML = '';
+					  // oImage.destroy();				  
+					  myapp.placeAt('root');				  
+				  }, 
+			      function(err){
+			    	window.alert("error: "+ err.message);
+			    	busyDialog.close();	}			  
+				);			
+	}		
+		
+
+	
+	</script>
+</body>
+</html>
